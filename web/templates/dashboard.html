@@ -1,0 +1,396 @@
+{% extends "base.html" %}
+
+{% block title %}AIvance Dashboard{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', path='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-content">
+            <h1 class="dashboard-title">
+                <i class="fas fa-brain"></i>
+                AIvance Control Center
+            </h1>
+            <p class="dashboard-subtitle">Advanced AI System Management Dashboard</p>
+        </div>
+        <div class="header-actions">
+            <button class="btn-primary" onclick="refreshDashboard()">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+            <button class="btn-secondary" onclick="showSystemInfo()">
+                <i class="fas fa-info-circle"></i>
+                System Info
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="active-models">3</div>
+                <div class="stat-label">Active Models</div>
+            </div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+2</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-comments"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="total-requests">1,247</div>
+                <div class="stat-label">Total Requests</div>
+            </div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>+15%</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-memory"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="memory-usage">45%</div>
+                <div class="stat-label">Memory Usage</div>
+            </div>
+            <div class="stat-trend neutral">
+                <i class="fas fa-minus"></i>
+                <span>Stable</span>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="stat-content">
+                <div class="stat-value" id="response-time">0.8s</div>
+                <div class="stat-label">Avg Response</div>
+            </div>
+            <div class="stat-trend positive">
+                <i class="fas fa-arrow-down"></i>
+                <span>-12%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="dashboard-grid">
+        <!-- AI Model Status -->
+        <div class="dashboard-card model-status">
+            <div class="card-header">
+                <h3><i class="fas fa-microchip"></i> AI Model Status</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" onclick="refreshModels()">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="model-list" id="model-list">
+                    <div class="model-item online">
+                        <div class="model-info">
+                            <div class="model-name">GPT-4</div>
+                            <div class="model-provider">OpenAI</div>
+                        </div>
+                        <div class="model-status">
+                            <span class="status-dot online"></span>
+                            <span class="status-text">Online</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Requests</span>
+                                <span class="metric-value">847</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Tokens</span>
+                                <span class="metric-value">2.1M</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="model-item online">
+                        <div class="model-info">
+                            <div class="model-name">Claude-3</div>
+                            <div class="model-provider">Anthropic</div>
+                        </div>
+                        <div class="model-status">
+                            <span class="status-dot online"></span>
+                            <span class="status-text">Online</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Requests</span>
+                                <span class="metric-value">324</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Tokens</span>
+                                <span class="metric-value">890K</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="model-item offline">
+                        <div class="model-info">
+                            <div class="model-name">GPT-3.5</div>
+                            <div class="model-provider">OpenAI</div>
+                        </div>
+                        <div class="model-status">
+                            <span class="status-dot offline"></span>
+                            <span class="status-text">Offline</span>
+                        </div>
+                        <div class="model-metrics">
+                            <div class="metric">
+                                <span class="metric-label">Requests</span>
+                                <span class="metric-value">76</span>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Tokens</span>
+                                <span class="metric-value">156K</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Real-time Activity -->
+        <div class="dashboard-card activity-feed">
+            <div class="card-header">
+                <h3><i class="fas fa-stream"></i> Real-time Activity</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" onclick="clearActivity()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="activity-list" id="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">User request processed via GPT-4</div>
+                            <div class="activity-time">2 seconds ago</div>
+                        </div>
+                        <div class="activity-status success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Memory system updated</div>
+                            <div class="activity-time">5 seconds ago</div>
+                        </div>
+                        <div class="activity-status info">
+                            <i class="fas fa-info"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Plugin system reloaded</div>
+                            <div class="activity-time">12 seconds ago</div>
+                        </div>
+                        <div class="activity-status warning">
+                            <i class="fas fa-exclamation"></i>
+                        </div>
+                    </div>
+
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">Analytics data processed</div>
+                            <div class="activity-time">1 minute ago</div>
+                        </div>
+                        <div class="activity-status success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance -->
+        <div class="dashboard-card performance">
+            <div class="card-header">
+                <h3><i class="fas fa-tachometer-alt"></i> System Performance</h3>
+                <div class="card-actions">
+                    <button class="btn-icon" onclick="togglePerformanceView()">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-content">
+                <div class="performance-metrics">
+                    <div class="performance-item">
+                        <div class="performance-label">CPU Usage</div>
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: 23%"></div>
+                        </div>
+                        <div class="performance-value">23%</div>
+                    </div>
+
+                    <div class="performance-item">
+                        <div class="performance-label">Memory Usage</div>
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: 45%"></div>
+                        </div>
+                        <div class="performance-value">45%</div>
+                    </div>
+
+                    <div class="performance-item">
+                        <div class="performance-label">Network I/O</div>
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: 67%"></div>
+                        </div>
+                        <div class="performance-value">67%</div>
+                    </div>
+
+                    <div class="performance-item">
+                        <div class="performance-label">Disk Usage</div>
+                        <div class="performance-bar">
+                            <div class="performance-fill" style="width: 34%"></div>
+                        </div>
+                        <div class="performance-value">34%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="dashboard-card quick-actions">
+            <div class="card-header">
+                <h3><i class="fas fa-rocket"></i> Quick Actions</h3>
+            </div>
+            <div class="card-content">
+                <div class="actions-grid">
+                    <button class="action-btn" onclick="startNewChat()">
+                        <div class="action-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <div class="action-text">New Chat</div>
+                    </button>
+
+                    <button class="action-btn" onclick="openAnalytics()">
+                        <div class="action-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="action-text">Analytics</div>
+                    </button>
+
+                    <button class="action-btn" onclick="managePlugins()">
+                        <div class="action-icon">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <div class="action-text">Plugins</div>
+                    </button>
+
+                    <button class="action-btn" onclick="systemSettings()">
+                        <div class="action-icon">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="action-text">Settings</div>
+                    </button>
+
+                    <button class="action-btn" onclick="backupSystem()">
+                        <div class="action-icon">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="action-text">Backup</div>
+                    </button>
+
+                    <button class="action-btn" onclick="systemHealth()">
+                        <div class="action-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="action-text">Health Check</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="dashboard-section">
+        <div class="section-header">
+            <h3><i class="fas fa-history"></i> Recent Sessions</h3>
+            <button class="btn-text" onclick="viewAllSessions()">View All</button>
+        </div>
+        <div class="sessions-grid" id="sessions-grid">
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">Quantum Computing Discussion</div>
+                    <div class="session-time">2 hours ago</div>
+                </div>
+                <div class="session-meta">
+                    <span class="session-model">GPT-4</span>
+                    <span class="session-duration">15 min</span>
+                    <span class="session-messages">24 messages</span>
+                </div>
+                <div class="session-preview">
+                    Discussion about quantum computing principles and applications...
+                </div>
+            </div>
+
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">Code Review Assistant</div>
+                    <div class="session-time">4 hours ago</div>
+                </div>
+                <div class="session-meta">
+                    <span class="session-model">Claude-3</span>
+                    <span class="session-duration">8 min</span>
+                    <span class="session-messages">12 messages</span>
+                </div>
+                <div class="session-preview">
+                    Code review and optimization suggestions for Python project...
+                </div>
+            </div>
+
+            <div class="session-card">
+                <div class="session-header">
+                    <div class="session-title">Creative Writing Workshop</div>
+                    <div class="session-time">6 hours ago</div>
+                </div>
+                <div class="session-meta">
+                    <span class="session-model">GPT-4</span>
+                    <span class="session-duration">22 min</span>
+                    <span class="session-messages">31 messages</span>
+                </div>
+                <div class="session-preview">
+                    Creative writing assistance and story development...
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', path='js/dashboard.js') }}"></script>
+{% endblock %} 
